@@ -1,0 +1,58 @@
+body {
+  margin: 20;
+  padding: 10;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
+    "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue",
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New",
+    monospace;
+}
+
+input, select, button {
+  font-size: 15px;
+}
+
+.error {
+  color: red;
+  background: lightpink;
+  font-size: 20px;
+  border-style: solid;
+  border-radius: 10px;
+  padding: 10px;
+  margin-bottom: 10px;  
+}
+.success {
+  color: green;
+  background: lightgreen;
+  font-size: 20px;
+  border-style: solid;
+  border-radius: 10px;
+  padding: 10px;
+  margin-bottom: 10px;  
+}
+
+#formstyle {
+  font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
+  font-size: 20px;
+  background-color: #aaaaff;
+  border-collapse: collapse;
+  padding: 10px;
+  margin: 10px;
+}
+
+#detailsshown {
+  font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
+  background-color: #eeeeee;
+  border-collapse: collapse;
+  padding: 10px;
+  margin: 10px;
+}
+
+#detailshidden {
+  display: none;
+}
