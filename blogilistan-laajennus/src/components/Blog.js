@@ -1,42 +1,62 @@
 import React, { useState } from 'react'
+import { connect } from 'react-redux'
 import PropTypes from 'prop-types'
+import { like, removeBlog } from '../reducers/blogReducer'
+import { setNotification } from '../reducers/notificationReducer'
 
-const Blog = ({ blog, likeHandler, deleteHandler, showRemove }) => {
-  const [likes, setLikes] = useState(blog.likes)
+const Blog = (props) => {
   const [showDetails, setShowDetails] = useState('detailshidden')
 
   const toggleVisibility = () => {
     setShowDetails(showDetails === 'detailshidden' ? 'detailsshown' : 'detailshidden')
   }
 
-  const handleLike = async (event) => {
-    setLikes(blog.likes + 1)
-    likeHandler(event)
-  }
-
-  const handleRemove = async (event) => {
-    if (window.confirm(`Remove blog ${blog.title} by ${blog.author}?`)) {
-      deleteHandler(event)
+  const likeBlog = async (event) => {
+    event.preventDefault()
+    const blogId = event.target.value
+    const blog = props.blogs.find(blog => blog.id === blogId)
+    try {
+      //console.log("Liking blog", blog)
+      props.like(blog)
+      props.setNotification('success', `Blog ${blog.title} by ${blog.author} was liked`, 2)
+    } catch (exception) {
+      props.setNotification('error', exception.response.data.error, 10)
     }
   }
 
+  const removeBlog = async (event) => {
+    event.preventDefault()
+    const blogId = event.target.value
+    const deletee = props.blogs.find(blog => blog.id === blogId)
+    const titleOfDeleted = `${deletee.title} by ${deletee.author}`
+    //console.log('Deleting blog ', titleOfDeleted)
+    try {
+      props.removeBlog(blogId)
+      props.setNotification('success', `The blog ${titleOfDeleted} was deleted`, 5)
+    } catch (exception) {
+      props.setNotification('error', exception.response.data.error, 10)
+    }
+  }
+
+
+
   const BlogTitle = () => {
-    return <div>{blog.title} by {blog.author}</div>
+    return <div>{props.blog.title} by {props.blog.author}</div>
   }
 
   const AddedBy = () => {
-    if (blog.hasOwnProperty('user')) {
-      return <td>Added by {blog.user.name}</td>
+    if (props.blog.hasOwnProperty('user')) {
+      return <td>Added by {props.blog.user.name}</td>
     } else {
       return <td>&nbsp;</td>
     }
   }
 
   const RemoveButton = () => {
-    if (showRemove) {
-      return <td><button value={blog.id} type="button" onClick={handleRemove}>Remove</button></td>
-    } else {
+    if (props.blog.user === undefined || props.blog.user.id !== props.loggedUser.id) {
       return <td>&nbsp;</td>
+    } else {
+      return <td><button value={props.blog.id} type="button" onClick={removeBlog}>Remove</button></td>
     }
   }
 
@@ -45,10 +65,10 @@ const Blog = ({ blog, likeHandler, deleteHandler, showRemove }) => {
       <table id={showDetails}>
         <tbody>
           <tr>
-            <td><a href={blog.url}>{blog.url}</a></td>
+            <td><a href={props.blog.url}>{props.blog.url}</a></td>
           </tr>
           <tr>
-            <td>{likes} likes <button value={blog.id} type="button" onClick={handleLike}>Like</button></td>
+            <td>{props.blog.likes} likes <button value={props.blog.id} type="button" onClick={likeBlog}>Like</button></td>
           </tr>
           <tr>
             {AddedBy()}
@@ -76,9 +96,20 @@ const Blog = ({ blog, likeHandler, deleteHandler, showRemove }) => {
 
 Blog.propTypes = {
   blog: PropTypes.object.isRequired,
-  likeHandler: PropTypes.func.isRequired,
-  deleteHandler: PropTypes.func.isRequired,
   showRemove: PropTypes.bool.isRequired
 }
 
-export default Blog
+const mapStateToProps = (state) => {
+  return {
+    blogs: state.blogs,
+    loggedUser: state.authentication.loggedUser
+  }
+}
+
+const mapDispatchToProps = {
+  setNotification,
+  like,
+  removeBlog
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(Blog)

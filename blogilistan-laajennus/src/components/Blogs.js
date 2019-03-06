@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react'
 import { connect } from 'react-redux'
 import { useField } from '../hooks/index'
 import PropTypes from 'prop-types'
-import blogService from '../services/blogs'
 import Blog from './Blog'
+import { initializeBlogs, createBlog } from '../reducers/blogReducer'
 import { setNotification } from '../reducers/notificationReducer'
 
 const Blogs = (props) => {
@@ -12,22 +12,15 @@ const Blogs = (props) => {
   const newAuthor = useField('text')
   const newURL = useField('text')
 
-  const [blogs, setBlogs] = useState([])
   const [showForm, setShowForm] = useState(false)
 
-  const fetchAll = async () => {
-    const unsorted = await blogService.getAll()
-    setBlogs(sortBlogs(unsorted))
+  const initBlogs = async () => {
+    await props.initializeBlogs()
   }
 
   useEffect(() => {
-    fetchAll()
+    initBlogs()
   }, [])
-
-  const sortBlogs = (unsorted) => {
-    //console.log('Sorting blogs')
-    return unsorted.sort(function (a, b) { return b.likes - a.likes })
-  }
 
   const handleShowForm = (event) => {
     setShowForm(!showForm)
@@ -35,70 +28,41 @@ const Blogs = (props) => {
 
   const addBlog = async (event) => {
     event.preventDefault()
-    const blogObject = {
+    const newBlog = {
       title: newTitle.params.value,
       author: newAuthor.params.value,
-      url: newURL.params.value
+      url: newURL.params.value,
+      user: {
+        username: props.loggedUser.username,
+        name: props.loggedUser.name,
+        id: props.loggedUser.id
+      }
     }
-
     try {
-      const created = await blogService.create(blogObject)
-      //console.log('Created blog', created)
-      setBlogs(blogs.concat(created))
+      props.createBlog(newBlog)
       newTitle.reset()
       newAuthor.reset()
       newURL.reset()
-      props.setNotification('success', `A new blog ${created.title} by ${created.author} was added`, 5)
+      props.setNotification('success', `A new blog ${newBlog.title} by ${newBlog.author} was added`, 5)
     } catch (error) {
       console.log(error.response.data.error)
       props.setNotification('error', error.response.data.error, 10)
     }
   }
 
-  const likeBlog = async (event) => {
-    event.preventDefault()
-    const blogId = event.target.value
-    const blog = blogs.find(blog => blog.id === blogId)
-    try {
-      const updated = await blogService.update({ blog, blogId })
-      blog.likes = updated.likes
-      const updatedBlogs = blogs.map(b => b.id === blog.id ? blog : b)
-      sortBlogs(updatedBlogs)
-      setBlogs(updatedBlogs)
-      props.setNotification('success', `Blog ${blog.title} by ${blog.author} was liked`, 2)
-    } catch (exception) {
-      props.setNotification('error', exception.response.data.error, 10)
-    }
-  }
-
-  const deleteBlog = async (event) => {
-    event.preventDefault()
-    const blogId = event.target.value
-    const deletee = blogs.find(blog => blog.id === blogId)
-    const titleOfDeleted = `${deletee.title} by ${deletee.author}`
-    //console.log('Deleting blog ', titleOfDeleted)
-    try {
-      await blogService.remove({ blogId })
-      setBlogs(blogs.filter(blog => blog.id !== blogId))
-      props.setNotification('success', `The blog ${titleOfDeleted} was deleted`, 5)
-    } catch (exception) {
-      props.setNotification('error', exception.response.data.error, 10)
-    }
-  }
-
   const blogList = () => {
-    return (
-      <div>
-        {blogs.map(blog =>
-          <Blog
-            key={blog.id}
-            blog={blog}
-            likeHandler={likeBlog}
-            deleteHandler={deleteBlog}
-            showRemove={!blog.user || blog.user.id !== props.userId ? false : true} />
-        )}
-      </div>
-    )
+    if (props.blogs !== undefined) {
+      return (
+        <div>
+          {props.blogs.map(blog =>
+            <Blog key={blog.id} blog={blog}
+              showRemove={!blog.user || blog.user.id !== props.userId ? false : true} />
+          )}
+        </div>
+      )
+    } else {
+      return <div></div>
+    }
   }
 
   const CreateNewButton = () => {
@@ -161,11 +125,20 @@ const Blogs = (props) => {
 
 Blogs.propTypes = {
   setNotification: PropTypes.func.isRequired,
-  userId: PropTypes.string.isRequired
+  loggedUser: PropTypes.object.isRequired
+}
+
+const mapStateToProps = (state) => {
+  return {
+    blogs: state.blogs,
+    loggedUser: state.authentication.loggedUser
+  }
 }
 
 const mapDispatchToProps = {
-  setNotification
+  setNotification,
+  initializeBlogs,
+  createBlog
 }
 
-export default connect(null, mapDispatchToProps)(Blogs)
+export default connect(mapStateToProps, mapDispatchToProps)(Blogs)

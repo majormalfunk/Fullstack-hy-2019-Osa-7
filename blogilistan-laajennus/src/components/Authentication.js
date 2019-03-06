@@ -3,14 +3,12 @@ import { connect } from 'react-redux'
 import PropTypes from 'prop-types'
 import { useField } from '../hooks/index'
 import { setNotification } from '../reducers/notificationReducer'
-import { loginUser, logoutUser } from '../reducers/authenticationReducer'
+import { loginUser, reLoginUser, logoutUser } from '../reducers/authenticationReducer'
 
 const Authentication = (props) => {
 
   const username = useField('text')
   const password = useField('password')
-
-  //  const [loggedUser, setLoggedUser] = useState(null)
 
   const storageKeyUser = 'loggedBlogUser'
 
@@ -27,7 +25,7 @@ const Authentication = (props) => {
     const user = storageUserToUser()
     if (user !== undefined && user !== null) {
       console.log("Storage user was", user)
-      props.userHandler(user)
+      props.reLoginUser(user)
     }
   }, [])
 
@@ -35,8 +33,6 @@ const Authentication = (props) => {
     event.preventDefault()
     try {
       await props.loginUser(username.params.value, password.params.value)
-      const user = storageUserToUser()
-      props.userHandler(user)
       username.reset()
       password.reset()
       props.setNotification('success', 'Welcome!', 5)
@@ -51,7 +47,6 @@ const Authentication = (props) => {
       console.log('Logging out user', props.loggedUser.username)
       await props.logoutUser()
       window.localStorage.removeItem(storageKeyUser)
-      props.userHandler(null)
       props.setNotification('success', 'Goodbye!', 5)
     } catch (exception) {
       props.setNotification('error', 'Unable to logout. Strange.', 10)
@@ -126,6 +121,7 @@ const mapStateToProps = (state) => {
 
 const mapDispatchToProps = {
   loginUser,
+  reLoginUser,
   logoutUser,
   setNotification
 }

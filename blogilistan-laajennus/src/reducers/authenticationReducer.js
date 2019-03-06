@@ -1,4 +1,5 @@
 import loginService from '../services/login'
+import blogService from '../services/blogService'
 
 const storageKeyUser = 'loggedBlogUser'
 
@@ -8,7 +9,8 @@ export const loginUser = (username, password) => {
       username: username,
       password: password
     })
-    window.localStorage.setItem(storageKeyUser, JSON.stringify(user))
+    await blogService.setUser(user)
+    await window.localStorage.setItem(storageKeyUser, JSON.stringify(user))
     dispatch({
       type: 'LOGIN_USER',
       data: {
@@ -16,18 +18,34 @@ export const loginUser = (username, password) => {
       }
     })
   }
+}
 
+export const reLoginUser = (user) => {
+  return async dispatch => {
+    await blogService.setUser(user)
+    dispatch({
+      type: 'RELOGIN_USER',
+      data: {
+        loggedUser: user
+      }
+    })
+  }
 }
 
 export const logoutUser = () => {
-  return {
-    type: 'LOGOUT_USER'
+  return async dispatch => {
+    await blogService.setUser(null)
+    dispatch({
+      type: 'LOGOUT_USER'
+    })
   }
 }
 
 const reducerAuth = (state = { loggedUser: null }, action) => {
   switch (action.type) {
     case 'LOGIN_USER':
+      return action.data
+    case 'RELOGIN_USER':
       return action.data
     case 'LOGOUT_USER':
       return ''

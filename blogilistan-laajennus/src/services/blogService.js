@@ -1,5 +1,6 @@
 
 import axios from 'axios'
+
 const baseUrl = '/api/blogs'
 
 let user = null
@@ -22,30 +23,29 @@ const getAll = async () => {
   return response.data
 }
 
-const create = async newObject => {
+const create = async (blog) => {
   const config = {
     headers: { Authorization: token },
   }
-  newObject.user = user.id
-  const response = await axios.post(baseUrl, newObject, config)
-  response.data.user = { 'username': user.username, 'name': user.name, 'id': user.id }
+  const response = await axios.post(baseUrl, blog, config)
+  response.data.user = { username: blog.user.username, name: blog.user.name, id: blog.user.id }
   return response.data
 }
 
-const update = async ( props ) => {
+const update = async ( blog ) => {
   const config = {
     headers: { Authorization: token },
   }
-  const response = await axios.put(baseUrl.concat(`/${props.blogId}`), props.blog, config)
+  const response = await axios.put(baseUrl.concat(`/${blog.id}`), blog, config)
   return response.data
 }
 
-const remove = async ( props ) => {
+const remove = async ( blogId ) => {
   const config = {
     headers: { Authorization: token }
   }
-  const response = await axios.delete(baseUrl.concat(`/${props.blogId}`), config)
+  const response = await axios.delete(baseUrl.concat(`/${blogId}`), config)
   return response.data
 }
 
-export default { getAll, create, setUser, setToken, update, remove }
+export default {setUser, setToken, getAll, create, update, remove}
