@@ -1,4 +1,4 @@
-import loginService from '../services/login'
+import loginService from '../services/loginService'
 import blogService from '../services/blogService'
 
 const storageKeyUser = 'loggedBlogUser'
@@ -36,7 +36,10 @@ export const logoutUser = () => {
   return async dispatch => {
     await blogService.setUser(null)
     dispatch({
-      type: 'LOGOUT_USER'
+      type: 'LOGOUT_USER',
+      data: {
+        loggedUser: null
+      }
     })
   }
 }
@@ -48,7 +51,7 @@ const reducerAuth = (state = { loggedUser: null }, action) => {
     case 'RELOGIN_USER':
       return action.data
     case 'LOGOUT_USER':
-      return ''
+      return action.data
     default:
       return state
   }

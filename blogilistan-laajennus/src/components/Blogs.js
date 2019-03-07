@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState } from 'react'
 import { connect } from 'react-redux'
 import { useField } from '../hooks/index'
 import PropTypes from 'prop-types'
 import Blog from './Blog'
-import { initializeBlogs, createBlog } from '../reducers/blogReducer'
+import { createBlog } from '../reducers/blogReducer'
 import { setNotification } from '../reducers/notificationReducer'
 
 const Blogs = (props) => {
@@ -14,15 +14,7 @@ const Blogs = (props) => {
 
   const [showForm, setShowForm] = useState(false)
 
-  const initBlogs = async () => {
-    await props.initializeBlogs()
-  }
-
-  useEffect(() => {
-    initBlogs()
-  }, [])
-
-  const handleShowForm = (event) => {
+  const handleShowForm = () => {
     setShowForm(!showForm)
   }
 
@@ -50,13 +42,20 @@ const Blogs = (props) => {
     }
   }
 
+  const haveBlogs = () => {
+    return (props.blogs !== undefined && props.blogs !== null)
+  }
+  const haveUser = () => {
+    return (props.loggedUser !== undefined && props.loggedUser !== null)
+  }
+
   const blogList = () => {
-    if (props.blogs !== undefined) {
+    if (haveUser() && haveBlogs()) {
       return (
         <div>
           {props.blogs.map(blog =>
             <Blog key={blog.id} blog={blog}
-              showRemove={!blog.user || blog.user.id !== props.userId ? false : true} />
+              showRemove={!blog.user || blog.user.id !== props.loggedUser.id ? false : true} />
           )}
         </div>
       )
@@ -110,22 +109,27 @@ const Blogs = (props) => {
     )
   }
 
-  return (
-    <div>
-      <div id="formstyle">
-        {showForm ? NewBlogForm() : CreateNewButton()}
-      </div>
+  if (haveUser()) {
+    return (
       <div>
-        {blogList()}
+        <h3>Blogs</h3>
+        <div id="formstyle">
+          {showForm ? NewBlogForm() : CreateNewButton()}
+        </div>
+        <div>
+          {blogList()}
+        </div>
       </div>
-    </div>
-  )
+    )
+  } else {
+    return <div></div>
+  }
 
 }
 
 Blogs.propTypes = {
   setNotification: PropTypes.func.isRequired,
-  loggedUser: PropTypes.object.isRequired
+  loggedUser: PropTypes.object
 }
 
 const mapStateToProps = (state) => {
@@ -137,7 +141,6 @@ const mapStateToProps = (state) => {
 
 const mapDispatchToProps = {
   setNotification,
-  initializeBlogs,
   createBlog
 }
 

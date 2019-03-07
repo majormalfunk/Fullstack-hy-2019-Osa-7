@@ -30,6 +30,12 @@ export const initializeBlogs = () => {
   }
 }
 
+export const clearBlogs = () => {
+  return {
+    type: 'CLEAR_BLOGS'
+  }
+}
+
 export const like = blog => {
   return async dispatch => {
     const likedBlog = blog
@@ -51,6 +57,8 @@ const reducerBlog = (state = [], action) => {
       return state.filter(blog => blog.id !== deletedId)
     case 'INIT_BLOGS':
       return action.data.sort((a, b) => b.likes - a.likes)
+    case 'CLEAR_BLOGS':
+      return null
     case 'LIKE_BLOG':
       const changedBlog = action.data
       const id = changedBlog.id

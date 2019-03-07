@@ -3,9 +3,11 @@ import { connect } from 'react-redux'
 import PropTypes from 'prop-types'
 import { useField } from '../hooks/index'
 import { setNotification } from '../reducers/notificationReducer'
-import { loginUser, reLoginUser, logoutUser } from '../reducers/authenticationReducer'
+import { loginUser, reLoginUser } from '../reducers/authenticationReducer'
+import { initializeBlogs } from '../reducers/blogReducer'
+import { initializeUsers } from '../reducers/userReducer'
 
-const Authentication = (props) => {
+const Login = (props) => {
 
   const username = useField('text')
   const password = useField('password')
@@ -21,11 +23,17 @@ const Authentication = (props) => {
     }
   }
 
+  const initStuff = async () => {
+    await props.initializeBlogs()
+    await props.initializeUsers()
+}
+
   useEffect(() => {
     const user = storageUserToUser()
     if (user !== undefined && user !== null) {
       console.log("Storage user was", user)
       props.reLoginUser(user)
+      initStuff()
     }
   }, [])
 
@@ -33,23 +41,12 @@ const Authentication = (props) => {
     event.preventDefault()
     try {
       await props.loginUser(username.params.value, password.params.value)
+      initStuff()
       username.reset()
       password.reset()
       props.setNotification('success', 'Welcome!', 5)
     } catch (exception) {
       props.setNotification('error', 'Invalid username or password.', 5)
-    }
-  }
-
-  const handleLogout = async (event) => {
-    event.preventDefault()
-    try {
-      console.log('Logging out user', props.loggedUser.username)
-      await props.logoutUser()
-      window.localStorage.removeItem(storageKeyUser)
-      props.setNotification('success', 'Goodbye!', 5)
-    } catch (exception) {
-      props.setNotification('error', 'Unable to logout. Strange.', 10)
     }
   }
 
@@ -84,32 +81,18 @@ const Authentication = (props) => {
     )
   }
 
-  const logoutForm = () => {
-    return (
-      <div>
-        <p>{props.loggedUser.name} logged in</p>
-        <p />
-        <form onSubmit={handleLogout}>
-          <button type="submit">Logout</button>
-        </form>
-        <p />
-      </div>
-    )
-  }
-
   if (props.loggedUser === undefined || props.loggedUser === null) {
     return (
       <div>{loginForm()}</div>
     )
   } else {
     return (
-      <div>{logoutForm()}</div>
+      <div></div>
     )
   }
 
 }
-Authentication.propTypes = {
-  userHandler: PropTypes.func,
+Login.propTypes = {
   loggedUser: PropTypes.object
 }
 
@@ -122,8 +105,9 @@ const mapStateToProps = (state) => {
 const mapDispatchToProps = {
   loginUser,
   reLoginUser,
-  logoutUser,
-  setNotification
+  setNotification,
+  initializeBlogs,
+  initializeUsers
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(Authentication)
+export default connect(mapStateToProps, mapDispatchToProps)(Login)
