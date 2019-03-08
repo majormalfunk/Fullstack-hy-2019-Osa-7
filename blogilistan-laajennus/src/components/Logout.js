@@ -1,5 +1,6 @@
 import React from 'react'
 import { connect } from 'react-redux'
+import { Button } from 'react-bootstrap'
 import PropTypes from 'prop-types'
 import { setNotification } from '../reducers/notificationReducer'
 import { logoutUser } from '../reducers/authenticationReducer'
@@ -19,6 +20,7 @@ const Logout = (props) => {
       await props.clearUsers()
       window.localStorage.removeItem(storageKeyUser)
       props.setNotification('success', 'Goodbye!', 5)
+      return
     } catch (exception) {
       props.setNotification('error', 'Unable to logout. Strange.', 10)
     }
@@ -26,10 +28,10 @@ const Logout = (props) => {
 
   const logoutForm = () => {
     return (
-      <>
+      <div style={{color:"black"}}>
         {props.loggedUser.name} logged in &nbsp;
-        <button type="button" onClick={handleLogout}>Logout</button>
-      </>
+        <Button variant="primary" size="sm" type="button" onClick={handleLogout}>Logout</Button>
+      </div>
     )
   }
 

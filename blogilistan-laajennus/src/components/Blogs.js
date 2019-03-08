@@ -1,16 +1,16 @@
 import React, { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { connect } from 'react-redux'
-import { useField } from '../hooks/index'
+import { Table, Button, Form } from 'react-bootstrap'
 import PropTypes from 'prop-types'
 import { createBlog } from '../reducers/blogReducer'
 import { setNotification } from '../reducers/notificationReducer'
 
 const Blogs = (props) => {
 
-  const newTitle = useField('text')
-  const newAuthor = useField('text')
-  const newURL = useField('text')
+  const [title, setTitle] = useState('')
+  const [author, setAuthor] = useState('')
+  const [url, setUrl] = useState('')
 
   const [showForm, setShowForm] = useState(false)
 
@@ -18,12 +18,22 @@ const Blogs = (props) => {
     setShowForm(!showForm)
   }
 
+  const handleTitle = (event) => {
+    setTitle(event.target.value)
+  }
+  const handleAuthor = (event) => {
+    setAuthor(event.target.value)
+  }
+  const handleUrl = (event) => {
+    setUrl(event.target.value)
+  }
+
   const addBlog = async (event) => {
     event.preventDefault()
     const newBlog = {
-      title: newTitle.params.value,
-      author: newAuthor.params.value,
-      url: newURL.params.value,
+      title: title,
+      author: author,
+      url: url,
       user: {
         username: props.loggedUser.username,
         name: props.loggedUser.name,
@@ -32,9 +42,9 @@ const Blogs = (props) => {
     }
     try {
       props.createBlog(newBlog)
-      newTitle.reset()
-      newAuthor.reset()
-      newURL.reset()
+      setTitle('')
+      setAuthor('')
+      setUrl('')
       handleShowForm()
       props.setNotification('success', `A new blog ${newBlog.title} by ${newBlog.author} was added`, 5)
     } catch (error) {
@@ -50,40 +60,38 @@ const Blogs = (props) => {
     return (props.loggedUser !== undefined && props.loggedUser !== null)
   }
 
-  const padding = { padding: 5 }
-
   const blogList = () => {
-    if (haveUser() && haveBlogs()) {
+    if (haveBlogs()) {
       return (
-        <div width="80%">
-          <div id="detailsshown">
+        <Table responsive striped hover size="sm">
+          <thead>
+            <tr>
+              <th>Title</th><th>Author</th>
+            </tr>
+          </thead>
+          <tbody>
             {props.blogs.map(blog =>
-              <div key={blog.id} className="titleandauthor">
-                <div>
-                  <Link style={padding} to={`/blogs/${blog.id}`}>{blog.title} by {blog.author}</Link>
-                </div>
-              </div>
+              <tr key={blog.id}>
+                <td><Link to={`/blogs/${blog.id}`}>{blog.title}</Link></td>
+                <td>{blog.author}</td>
+              </tr>
             )}
-          </div>
-        </div>
+          </tbody>
+        </Table>
       )
     } else {
-      return <div></div>
+      return (
+        <div>
+          <h4>No blogs</h4>
+        </div>
+      )
     }
   }
 
   const CreateNewButton = () => {
     return (
       <div>
-        <button type="button" onClick={handleShowForm}>Create New</button>
-      </div>
-    )
-  }
-
-  const Cancel = () => {
-    return (
-      <div>
-        <button type="button" onClick={handleShowForm}>Cancel</button>
+        <Button type="button" variant="primary" size="sm" onClick={handleShowForm}>Create New</Button>
       </div>
     )
   }
@@ -91,28 +99,30 @@ const Blogs = (props) => {
   const NewBlogForm = () => {
     return (
       <div>
-        <form onSubmit={addBlog}>
-          <table>
-            <tbody>
-              <tr>
-                <td>Title:</td>
-                <td><input size="70" {...newTitle.params} /></td>
-              </tr>
-              <tr>
-                <td>Author:</td>
-                <td><input size="70" {...newAuthor.params} /></td>
-              </tr>
-              <tr>
-                <td>URL:</td>
-                <td><input size="70" {...newURL.params} /></td>
-              </tr>
-            </tbody>
-          </table>
-          <div>
-            <button type="submit">Create</button> <Cancel />
-          </div>
-        </form>
-        <p />
+        <Form onSubmit={addBlog}>
+          <Form.Group>
+            <Form.Label>Title</Form.Label>
+            <Form.Control type="text" name="title" onChange={handleTitle}
+              placeholder="Enter the title of the blog" />
+          </Form.Group>
+          <Form.Group>
+            <Form.Label>Author</Form.Label>
+            <Form.Control type="text" name="author" onChange={handleAuthor}
+              placeholder="Enter the name of the author" />
+          </Form.Group>
+          <Form.Group>
+            <Form.Label>URL</Form.Label>
+            <Form.Control type="text" name="url" onChange={handleUrl}
+              placeholder="Enter the url of the blog" />
+          </Form.Group>
+          <Form.Group>
+            <Button variant="success" type="submit" size="sm">Create</Button>
+          </Form.Group>
+          <Form.Group>
+            <Button variant="danger" type="button" size="sm"
+              onClick={handleShowForm}>Cancel</Button>
+          </Form.Group>
+        </Form>
       </div>
     )
   }
@@ -124,9 +134,7 @@ const Blogs = (props) => {
         <div id="formstyle">
           {showForm ? NewBlogForm() : CreateNewButton()}
         </div>
-        <div>
-          {blogList()}
-        </div>
+        {blogList()}
       </div>
     )
   } else {

@@ -1,7 +1,8 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
+import { Redirect } from 'react-router-dom'
 import { connect } from 'react-redux'
+import { Form, Button } from 'react-bootstrap'
 import PropTypes from 'prop-types'
-import { useField } from '../hooks/index'
 import { setNotification } from '../reducers/notificationReducer'
 import { loginUser, reLoginUser } from '../reducers/authenticationReducer'
 import { initializeBlogs } from '../reducers/blogReducer'
@@ -9,8 +10,8 @@ import { initializeUsers } from '../reducers/userReducer'
 
 const Login = (props) => {
 
-  const username = useField('text')
-  const password = useField('password')
+  const [username, setUsername] = useState('')
+  const [password, setPassword] = useState('')
 
   const storageKeyUser = 'loggedBlogUser'
 
@@ -26,7 +27,7 @@ const Login = (props) => {
   const initStuff = async () => {
     await props.initializeBlogs()
     await props.initializeUsers()
-}
+  }
 
   useEffect(() => {
     const user = storageUserToUser()
@@ -37,58 +38,58 @@ const Login = (props) => {
     }
   }, [])
 
+  const handleUsername = (event) => {
+    setUsername(event.target.value)
+  }
+  const handlePassword = (event) => {
+    setPassword(event.target.value)
+  }
+
   const handleLogin = async (event) => {
+    console.log("username", username)
+    console.log("password", password)
     event.preventDefault()
     try {
-      await props.loginUser(username.params.value, password.params.value)
+      await props.loginUser(username, password)
       initStuff()
-      username.reset()
-      password.reset()
+      setUsername('')
+      setPassword('')
       props.setNotification('success', 'Welcome!', 5)
     } catch (exception) {
       props.setNotification('error', 'Invalid username or password.', 5)
     }
   }
 
-  const loginForm = () => {
+  if (props.loggedUser === undefined || props.loggedUser === null) {
     return (
       <div>
         <h2>Log in to application</h2>
-        <form onSubmit={handleLogin}>
-          <table>
-            <tbody>
-              <tr>
-                <td>Username</td>
-                <td><input size="20" name="Username" {...username.params} /></td>
-              </tr>
-              <tr>
-                <td>Password</td>
-                <td><input size="20" name="Password" {...password.params} /></td>
-              </tr>
-              <tr>
-                <td>
-                  &nbsp;
-                </td>
-                <td>
-                  <button type="submit">Login</button>
-                </td>
-              </tr>
-            </tbody>
-          </table>
+        <Form onSubmit={handleLogin}>
+          <Form.Group>
+            <Form.Label>Username</Form.Label>
+            <Form.Control type="text" name="username"
+              placeholder="Enter username" onChange={handleUsername} />
+          </Form.Group>
+          <Form.Group>
+            <Form.Label>Password</Form.Label>
+            <Form.Control type="password" name="password"
+              placeholder="Enter password" onChange={handlePassword} />
+          </Form.Group>
+          <Form.Group>
+            <Button variant="primary" type="submit">Login</Button>
+          </Form.Group>
           <p />
-        </form>
-      </div>
-    )
-  }
-
-  if (props.loggedUser === undefined || props.loggedUser === null) {
-    return (
-      <div>{loginForm()}</div>
+        </Form>
+      </div >
     )
   } else {
-    return (
-      <div></div>
-    )
+    if (window.location.pathname !== "/") {
+      return (
+        <Redirect to="/"></Redirect>
+      )
+    } else {
+      return null
+    }
   }
 
 }

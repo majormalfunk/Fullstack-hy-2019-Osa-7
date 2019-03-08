@@ -1,9 +1,7 @@
 import React from 'react'
-import {
-  BrowserRouter as Router,
-  Route, Link, Redirect, withRouter
-} from 'react-router-dom'
+import { BrowserRouter as Router, Route, Link } from 'react-router-dom'
 import { connect } from 'react-redux'
+import { Navbar, Nav } from 'react-bootstrap'
 import Blogs from './components/Blogs'
 import Blog from './components/Blog'
 import Users from './components/Users'
@@ -15,33 +13,44 @@ import Logout from './components/Logout'
 const App = (props) => {
 
   const blogById = (id) => {
-    return props.blogs.find(a => a.id === id)
+    if (props.blogs !== undefined && props.blogs !== null) {
+      return props.blogs.find(a => a.id === id)
+    } else {
+      return null
+    }
   }
 
   const userById = (id) => {
-    return props.users.find(a => a.id === id)
+    if (props.users !== undefined && props.users !== null) {
+      return props.users.find(a => a.id === id)
+    } else {
+      return null
+    }
   }
 
   const padding = { paddingRight: 5 }
 
   return (
-    <div>
+    <div className="container">
       <Router>
         <div>
           <div>
-            <table>
-              <tbody>
-                <tr>
-                  <td>
+            <Navbar collapseOnSelect expand="lg" bg="warning" variant="dark">
+              <Navbar.Toggle aria-controls="responsive-navbar-nav" />
+              <Navbar.Collapse id="responsive-navbar-nav">
+                <Nav className="mr-auto">
+                  <Nav.Link href="#" as="span">
                     <Link style={padding} to="/">Blogs</Link>
+                  </Nav.Link>
+                  <Nav.Link href="#" as="span">
                     <Link style={padding} to="/users">Users</Link>
-                  </td>
-                  <td>
+                  </Nav.Link>
+                  <Navbar.Text as="span">
                     <Logout />
-                  </td>
-                </tr>
-              </tbody>
-            </table>
+                  </Navbar.Text>
+                </Nav>
+              </Navbar.Collapse>
+            </Navbar>
           </div>
           <div>
             <h2>Blog App</h2>
@@ -58,7 +67,7 @@ const App = (props) => {
           </div>
         </div>
       </Router>
-    </div>
+    </div >
   )
 }
 

@@ -1,5 +1,6 @@
 import React from 'react'
 import { connect } from 'react-redux'
+import { Alert } from 'react-bootstrap'
 import PropTypes from 'prop-types'
 
 const Notification = (props) => {
@@ -10,11 +11,11 @@ const Notification = (props) => {
     console.log('Notmessage', props.notMessage)
     if (props.notClass === 'error') {
       return (
-        <div className="error">{props.notMessage}</div>
+        <div><Alert variant="danger">{props.notMessage}</Alert></div>
       )
     } else {
       return (
-        <div className="success">{props.notMessage}</div>
+        <div><Alert variant="success">{props.notMessage}</Alert></div>
       )
     }
   }
