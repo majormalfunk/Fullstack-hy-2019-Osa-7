@@ -1,15 +1,13 @@
 import React, { useState } from 'react'
 import { connect } from 'react-redux'
+import { Redirect } from 'react-router-dom'
 import PropTypes from 'prop-types'
 import { like, removeBlog } from '../reducers/blogReducer'
 import { setNotification } from '../reducers/notificationReducer'
 
 const Blog = (props) => {
-  const [showDetails, setShowDetails] = useState('detailshidden')
 
-  const toggleVisibility = () => {
-    setShowDetails(showDetails === 'detailshidden' ? 'detailsshown' : 'detailshidden')
-  }
+  const [redirect, setRedirect] = useState(false)
 
   const likeBlog = async (event) => {
     event.preventDefault()
@@ -33,12 +31,11 @@ const Blog = (props) => {
     try {
       props.removeBlog(blogId)
       props.setNotification('success', `The blog ${titleOfDeleted} was deleted`, 5)
+      setRedirect(true)
     } catch (exception) {
       props.setNotification('error', exception.response.data.error, 10)
     }
   }
-
-
 
   const BlogTitle = () => {
     return <div>{props.blog.title} by {props.blog.author}</div>
@@ -62,7 +59,7 @@ const Blog = (props) => {
 
   const BlogDetails = () => {
     return (
-      <table id={showDetails}>
+      <table id="detailsshown">
         <tbody>
           <tr>
             <td><a href={props.blog.url}>{props.blog.url}</a></td>
@@ -81,22 +78,28 @@ const Blog = (props) => {
     )
   }
 
-  return (
-    <div width="80%">
-      <div>
-        <div id="detailsshown">
-          <div onClick={toggleVisibility} className="titleandauthor">{BlogTitle()}</div>
-          {showDetails === 'detailsshown' ? BlogDetails() : null}
+  if (props.blog !== undefined && props.blog !== null) {
+    return (
+      <div width="80%">
+        <div>
+          <div id="detailsshown">
+            <div className="titleandauthor">{BlogTitle()}</div>
+            {BlogDetails()}
+          </div>
         </div>
       </div>
-    </div>
-  )
+    )
+  } else if (redirect) {
+    return <Redirect to="/"></Redirect>
+  } else {
+    console.log("From Blog.js:", props)
+    return <div></div>
+  }
 
 }
 
 Blog.propTypes = {
-  blog: PropTypes.object.isRequired,
-  showRemove: PropTypes.bool.isRequired
+  blog: PropTypes.object
 }
 
 const mapStateToProps = (state) => {

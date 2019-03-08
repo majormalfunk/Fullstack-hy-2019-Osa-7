@@ -15,7 +15,7 @@ import Logout from './components/Logout'
 const App = (props) => {
 
   const blogById = (id) => {
-    props.blogs.find(a => a.id === id)
+    return props.blogs.find(a => a.id === id)
   }
 
   const userById = (id) => {

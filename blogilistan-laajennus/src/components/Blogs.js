@@ -1,8 +1,8 @@
 import React, { useState } from 'react'
+import { Link } from 'react-router-dom'
 import { connect } from 'react-redux'
 import { useField } from '../hooks/index'
 import PropTypes from 'prop-types'
-import Blog from './Blog'
 import { createBlog } from '../reducers/blogReducer'
 import { setNotification } from '../reducers/notificationReducer'
 
@@ -35,6 +35,7 @@ const Blogs = (props) => {
       newTitle.reset()
       newAuthor.reset()
       newURL.reset()
+      handleShowForm()
       props.setNotification('success', `A new blog ${newBlog.title} by ${newBlog.author} was added`, 5)
     } catch (error) {
       console.log(error.response.data.error)
@@ -49,14 +50,21 @@ const Blogs = (props) => {
     return (props.loggedUser !== undefined && props.loggedUser !== null)
   }
 
+  const padding = { padding: 5 }
+
   const blogList = () => {
     if (haveUser() && haveBlogs()) {
       return (
-        <div>
-          {props.blogs.map(blog =>
-            <Blog key={blog.id} blog={blog}
-              showRemove={!blog.user || blog.user.id !== props.loggedUser.id ? false : true} />
-          )}
+        <div width="80%">
+          <div id="detailsshown">
+            {props.blogs.map(blog =>
+              <div key={blog.id} className="titleandauthor">
+                <div>
+                  <Link style={padding} to={`/blogs/${blog.id}`}>{blog.title} by {blog.author}</Link>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       )
     } else {
