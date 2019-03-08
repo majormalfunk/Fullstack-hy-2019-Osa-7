@@ -1,8 +1,7 @@
 import React from 'react'
-import { BrowserRouter as Router, Route, Link } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import { connect } from 'react-redux'
 import PropTypes from 'prop-types'
-import User from './User'
 import { setNotification } from '../reducers/notificationReducer'
 
 const Users = (props) => {
@@ -14,11 +13,6 @@ const Users = (props) => {
     return (props.loggedUser !== undefined && props.loggedUser !== null)
   }
 
-  const userById = (id) => {
-    console.log("uBi props.users", props.users, "id", id)
-    return props.users.find(a => a.id === id)
-  }
-
   const padding = { paddingRight: 5 }
   const center = { textAlign: "center" }
 
@@ -26,7 +20,6 @@ const Users = (props) => {
     console.log("Users: props.users", props.users, "props.loggedUser", props.loggedUser)
     if (haveUser() && haveUsers()) {
       return (
-        <Router>
           <div>
             <table>
               <tbody>
@@ -40,11 +33,7 @@ const Users = (props) => {
                 )}
               </tbody>
             </table>
-            <Route exact path="/users/:id" render={({ match }) =>
-              <User user={userById(match.params.id)}
-              />} />
           </div>
-        </Router>
       )
     } else {
       return <div></div>

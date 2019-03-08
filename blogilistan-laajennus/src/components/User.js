@@ -14,9 +14,6 @@ const User = (props) => {
       return (
         <div>
           <div>
-            <h3>{props.user.name}</h3>
-          </div>
-          <div>
             <h4>Added blogs</h4>
           </div>
           <ul>
@@ -31,10 +28,10 @@ const User = (props) => {
     }
   }
 
-  if (haveBlogs()) {
+  if (props.user !== undefined && props.user !== null) {
     return (
       <div>
-        <h3>Users</h3>
+        <h3>{props.user.name}</h3>
         <div>
           {usersBlogList()}
         </div>

@@ -18,6 +18,10 @@ const App = (props) => {
     props.blogs.find(a => a.id === id)
   }
 
+  const userById = (id) => {
+    return props.users.find(a => a.id === id)
+  }
+
   const padding = { paddingRight: 5 }
 
   return (
@@ -48,6 +52,9 @@ const App = (props) => {
               <Blog blog={blogById(match.params.id)}
               />} />
             <Route exact path="/users" render={() => <Users />} />
+            <Route exact path="/users/:id" render={({ match }) =>
+              <User user={userById(match.params.id)}
+              />} />
           </div>
         </div>
       </Router>
